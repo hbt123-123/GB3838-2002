@@ -3,8 +3,6 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QTabWidget,
     QPushButton, QLabel, QScrollArea, QComboBox
 )
-# FigureCanvas import: prefer the newer 'backend_qtagg' (works with PyQt6),
-# fall back to 'backend_qt5agg' when qtagg is not available.
 try:
     from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 except Exception:
@@ -12,11 +10,9 @@ except Exception:
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
-# --- 修复中文显示问题 ---
-# 设置matplotlib使用支持中文的字体
 plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans'] # 优先使用黑体，备选DejaVu Sans
 plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示为方块的问题
-# --- 修复中文显示问题 ---
+
 
 from modules.database import DatabaseManager
 
