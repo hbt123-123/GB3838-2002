@@ -12,7 +12,6 @@ class WaterQualityConfig:
     MAX_PH = 9.0
 
     # 各类水质参数阈值标准 [Ⅰ类, Ⅱ类, Ⅲ类, Ⅳ类, Ⅴ类]
-    # None 表示该类别无此指标或该类别未规定此指标
     PARAMETER_STANDARDS = {
         "DO": [7.5, 6.0, 5.0, 3.0, 2.0],  # 溶解氧 (mg/L) - 数值越高越好
         "CODMn": [2, 4, 6, 10, 15],  # 高锰酸盐指数 (mg/L)
