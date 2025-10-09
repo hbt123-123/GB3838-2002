@@ -18,14 +18,6 @@ class WaterQualityMonitorApp(QMainWindow):
         self.setWindowTitle("水质监测分析系统")
         self.setGeometry(100, 100, 1200, 800)
 
-        # --- 移除菜单栏创建 ---
-        # self.create_menu_bar()
-        # --- 移除菜单栏创建 ---
-
-        # --- 移除工具栏创建 ---
-        # self.create_tool_bar()
-        # --- 移除工具栏创建 ---
-
         # 创建中央部件
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
