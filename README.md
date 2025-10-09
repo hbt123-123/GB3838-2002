@@ -2,7 +2,10 @@
 地表水环境质量标准
 
 # 水质监测分析系统 (Water Quality Monitoring System)
-
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![PyQt6](https://img.shields.io/badge/GUI-PyQt6-green)
+![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 ## 🌟 项目特色
 
 - **国家标准合规**：严格遵循GB3838-2002地表水环境质量标准
@@ -77,6 +80,106 @@ GB3838-2002/
 │   ├── analysis_report_tab.py # 分析报告模块
 │   └── database.py          # 数据库管理
 └── water_quality.db       # 数据库文件（运行时生成）
+```
+## 🔧 config.py 模块接口说明
+
+`config.py` 是水质评价的核心模块，可以独立集成到其他项目中。该模块基于GB3838-2002标准实现完整的水质参数评价功能。
+
+### 类与方法接口
+
+#### WaterQualityConfig 配置类
+
+| 类属性 | 类型 | 描述 |
+|--------|------|------|
+| `TEMP_RISE_THRESHOLD` | float | 最大升温阈值(℃)，默认1.0℃ |
+| `TEMP_DROP_THRESHOLD` | float | 最大降温阈值(℃)，默认2.0℃ |
+| `MIN_PH` | float | pH最小值，默认6.0 |
+| `MAX_PH` | float | pH最大值，默认9.0 |
+| `PARAMETER_STANDARDS` | Dict | 所有水质参数的标准阈值 |
+
+#### 核心评价函数
+
+| 函数名 | 参数 | 返回值 | 描述 |
+|--------|------|--------|------|
+| `temperature_check(current_temp, last_temp)` | `current_temp`: float, `last_temp`: float | Dict[str, Union[float, str]] | 温度变化检查，不合格直接判定为劣Ⅴ类 |
+| `ph_check(ph_value)` | `ph_value`: float | Dict[str, Union[float, str]] | pH值检查，不合格直接判定为劣Ⅴ类 |
+| `parameter_check(param_name, value, water_type)` | `param_name`: str, `value`: float, `water_type`: str = "river" | Dict[str, Union[float, str, int]] | 通用参数检查函数，支持河流/湖库类型 |
+| `evaluate_water_quality(parameters, water_type)` | `parameters`: Dict[str, Union[float, Dict]], `water_type`: str = "river" | Dict[str, Union[str, int, Dict]] | 水质综合评价函数，返回总体结果和详细信息 |
+
+#### 专用参数检查函数
+
+| 函数名 | 参数 | 返回值 | 描述 |
+|--------|------|--------|------|
+| `do_check(do_value)` | `do_value`: float | Dict | 溶解氧检查 |
+| `codmn_check(codmn_value)` | `codmn_value`: float | Dict | 高锰酸盐指数检查 |
+| `cod_check(cod_value)` | `cod_value`: float | Dict | 化学需氧量检查 |
+| `bod5_check(bod_value)` | `bod_value`: float | Dict | 五日生化需氧量检查 |
+| `nh4_n_check(nh4_value)` | `nh4_value`: float | Dict | 氨氮检查 |
+| `tn_check(tn_value)` | `tn_value`: float | Dict | 总氮检查 |
+| `tp_check(tp_value, water_type)` | `tp_value`: float, `water_type`: str = "river" | Dict | 总磷检查，区分河流/湖库 |
+| `cu_check(cu_value)` | `cu_value`: float | Dict | 铜检查 |
+| `zn_check(zn_value)` | `zn_value`: float | Dict | 锌检查 |
+| `f_check(f_value)` | `f_value`: float | Dict | 氟化物检查 |
+| `se_check(se_value)` | `se_value`: float | Dict | 硒检查 |
+| `as_check(as_value)` | `as_value`: float | Dict | 砷检查 |
+| `hg_check(hg_value)` | `hg_value`: float | Dict | 汞检查 |
+| `cd_check(cd_value)` | `cd_value`: float | Dict | 镉检查 |
+| `cr_vi_check(cr_vi_value)` | `cr_vi_value`: float | Dict | 六价铬检查 |
+| `pb_check(pb_value)` | `pb_value`: float | Dict | 铅检查 |
+| `cn_check(cn_value)` | `cn_value`: float | Dict | 氰化物检查 |
+| `c6h5oh_check(c6h5oh_value)` | `c6h5oh_value`: float | Dict | 挥发酚检查 |
+| `phc_check(phc_value)` | `phc_value`: float | Dict | 石油类检查 |
+| `las_as_check(las_as_value)` | `las_as_value`: float | Dict | 阴离子表面活性剂检查 |
+| `s2_h2s_check(s2_h2s_value)` | `s2_h2s_value`: float | Dict | 硫化物检查 |
+| `fc_check(fc_value)` | `fc_value`: float | Dict | 粪大肠杆菌检查 |
+
+### 使用示例
+
+```python
+from config import WaterQualityConfig, evaluate_water_quality, do_check, ph_check
+
+# 单个参数检查
+do_result = do_check(8.0)  # 返回: {"DO": 8.0, "result": "Ⅰ类", "category": 0}
+ph_result = ph_check(7.5)  # 返回: {"pH": 7.5, "result": "pH正常", ...}
+
+# 综合评价
+sample_data = {
+    "current_temp": 25.0,
+    "last_temp": 24.5,
+    "pH": 7.5,
+    "DO": 8.0,
+    "CODMn": 3.0,
+    "TP": 0.15
+}
+result = evaluate_water_quality(sample_data, "river")
+# 返回: {
+#   "overall_result": "Ⅲ类",
+#   "category": 2,
+#   "worst_param": "TP",
+#   "details": {...}
+# }
+
+# 访问配置参数
+print(f"pH允许范围: {WaterQualityConfig.MIN_PH} - {WaterQualityConfig.MAX_PH}")
+```
+
+### 集成到其他项目
+
+1. **单独使用评价功能**：
+```python
+from config import evaluate_water_quality
+
+def your_water_quality_function(data):
+    result = evaluate_water_quality(data, "river")
+    return result["overall_result"]
+```
+
+2. **自定义配置**：
+```python
+from config import WaterQualityConfig
+
+# 修改阈值
+WaterQualityConfig.TEMP_RISE_THRESHOLD = 1.5  # 调整升温阈值
 ```
 
 ## 🎯 使用指南
