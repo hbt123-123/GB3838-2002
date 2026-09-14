@@ -4,8 +4,8 @@ from PyQt6.QtWidgets import (
     QLabel, QLineEdit, QPushButton, QComboBox, QTextEdit,
     QScrollArea, QFrame, QGridLayout, QDateTimeEdit
 )
-from PyQt6.QtCore import Qt, QTimer, QDateTime
-from PyQt6.QtGui import QPalette, QDoubleValidator  # 修复：添加验证器导入
+from PyQt6.QtCore import QTimer, QDateTime
+from PyQt6.QtGui import QDoubleValidator  # 修复：添加验证器导入
 from config import (
     WaterQualityConfig, temperature_check, ph_check,
     do_check, codmn_check, cod_check, bod5_check, nh4_n_check,

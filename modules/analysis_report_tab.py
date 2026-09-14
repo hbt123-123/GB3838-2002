@@ -101,7 +101,8 @@ class AnalysisReportTab(QWidget):
                 self._show_no_data_message(self.trend_fig, "趋势分析")
                 self._show_no_data_message(self.dist_fig, "类别分布")
                 self._show_no_data_message(self.comp_fig, "参数对比")
-                self.update_location_combo(all_data) # 更新下拉框选项
+                self.location_combo.clear()
+                self.location_combo.addItem("全部")
                 return
 
             # 更新监测断面下拉框
@@ -125,11 +126,12 @@ class AnalysisReportTab(QWidget):
         """当监测断面选择改变时，重新加载数据"""
         selected_location = self.location_combo.currentText()
         try:
-            all_data = self.db_manager.get_monitoring_data()
             if selected_location == "全部":
-                data_to_plot = all_data
+                filters = None
+                data_to_plot = self.db_manager.get_monitoring_data(filters)
             else:
-                data_to_plot = [item for item in all_data if item.get('location', '未知断面') == selected_location]
+                filters = {'location': selected_location}
+                data_to_plot = self.db_manager.get_monitoring_data(filters)
 
             if not data_to_plot:
                 print(f"监测断面 '{selected_location}' 没有数据。")
@@ -162,19 +164,29 @@ class AnalysisReportTab(QWidget):
         self.trend_fig.clear()
         ax = self.trend_fig.add_subplot(111)
         
-        # 准备数据
-        timestamps = [item['timestamp'] for item in data]
-        do_values = [item['do_value'] for item in data if item['do_value'] is not None]
-        ph_values = [item['ph'] for item in data if item['ph'] is not None]
-        codmn_values = [item['codmn_value'] for item in data if item['codmn_value'] is not None]
+        # 准备数据：时间戳与值一一对应过滤
+        timestamps = []
+        do_values = []
+        ph_values = []
+        codmn_values = []
+        for item in data:
+            timestamps.append(item['timestamp'])
+            do_values.append(item['do_value'] if item['do_value'] is not None else None)
+            ph_values.append(item['ph'] if item['ph'] is not None else None)
+            codmn_values.append(item['codmn_value'] if item['codmn_value'] is not None else None)
 
-        # 绘制多条线（确保时间戳和值长度一致）
-        if len(do_values) > 0:
-            ax.plot(timestamps[:len(do_values)], do_values, label='DO (mg/L)', marker='o', linestyle='-')
-        if len(ph_values) > 0:
-            ax.plot(timestamps[:len(ph_values)], ph_values, label='pH', marker='s', linestyle='--')
-        if len(codmn_values) > 0:
-            ax.plot(timestamps[:len(codmn_values)], codmn_values, label='CODMn (mg/L)', marker='^', linestyle='-.')
+        # 过滤 None 值
+        do_plot = [(t, v) for t, v in zip(timestamps, do_values) if v is not None]
+        ph_plot = [(t, v) for t, v in zip(timestamps, ph_values) if v is not None]
+        codmn_plot = [(t, v) for t, v in zip(timestamps, codmn_values) if v is not None]
+
+        # 绘制多条线
+        if do_plot:
+            ax.plot([p[0] for p in do_plot], [p[1] for p in do_plot], label='DO (mg/L)', marker='o', linestyle='-')
+        if ph_plot:
+            ax.plot([p[0] for p in ph_plot], [p[1] for p in ph_plot], label='pH', marker='s', linestyle='--')
+        if codmn_plot:
+            ax.plot([p[0] for p in codmn_plot], [p[1] for p in codmn_plot], label='CODMn (mg/L)', marker='^', linestyle='-.')
             
         ax.set_xlabel('时间')
         ax.set_ylabel('数值')

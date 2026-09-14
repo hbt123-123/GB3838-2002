@@ -4,8 +4,6 @@ from PyQt6.QtWidgets import (
     QLabel, QTableWidget, QTableWidgetItem, QHeaderView,
     QFileDialog, QComboBox, QGridLayout, QAbstractItemView
 )
-from PyQt6.QtCore import Qt
-import pandas as pd
 import sqlite3 # 导入sqlite3以处理数据库连接
 # --- 添加/更新映射字典 ---
 # 将英文字段名映射到中文标签 (包含所有数据库字段)
@@ -230,7 +228,6 @@ class BatchImportTab(QWidget):
                             elif param_english == 'timestamp': # 特殊处理时间
                                 try:
                                     # 尝试解析时间，支持多种常见格式
-                                    import pandas as pd
                                     parsed_time = pd.to_datetime(value, errors='coerce') # errors='coerce' 会将无法解析的设为NaT
                                     if pd.notna(parsed_time):
                                         data_record[param_english] = parsed_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -262,7 +259,13 @@ class BatchImportTab(QWidget):
                 # 插入数据库
                 try:
                     # 构建插入语句和参数
-                    columns = list(data_record.keys())
+                    valid_columns = {'location', 'timestamp', 'temperature', 'last_temperature', 'ph', 'do_value',
+                                     'codmn_value', 'cod_value', 'bod5_value', 'nh4_n_value', 'tp_value',
+                                     'tn_value', 'cu_value', 'zn_value', 'f_value', 'se_value', 'as_value',
+                                     'hg_value', 'cd_value', 'cr_vi_value', 'pb_value', 'cn_value',
+                                     'c6h5oh_value', 'phc_value', 'las_as_value', 's2_h2s_value', 'fc_value',
+                                     'water_type', 'temp_result', 'ph_result', 'overall_category', 'notes'}
+                    columns = [c for c in data_record.keys() if c in valid_columns]
                     placeholders = ', '.join(['?' for _ in columns])
                     column_str = ', '.join(columns)
                     sql = f"INSERT INTO monitoring_data ({column_str}) VALUES ({placeholders})"

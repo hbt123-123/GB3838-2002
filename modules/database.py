@@ -1,8 +1,6 @@
 # modules/database.py
 import sqlite3
-import os
 from datetime import datetime
-from config import WaterQualityConfig
 
 class DatabaseManager:
     def __init__(self, db_path="water_quality.db"):

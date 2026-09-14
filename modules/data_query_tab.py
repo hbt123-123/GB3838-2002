@@ -138,10 +138,7 @@ class DataQueryTab(QWidget):
             return
 
         # 从数据库删除
-        try:
-            self.db_manager.delete_monitoring_data(ids_to_delete)
-            print(f"已删除 {len(ids_to_delete)} 条记录。")
-            # 重新查询以更新表格
-            self.query_data()
-        except Exception as e:
-            print(f"删除数据失败: {str(e)}")
+        self.db_manager.delete_monitoring_data(ids_to_delete)
+        print(f"已删除 {len(ids_to_delete)} 条记录。")
+        # 重新查询以更新表格
+        self.query_data()

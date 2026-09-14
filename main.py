@@ -1,7 +1,6 @@
 # main.py
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTabWidget, QVBoxLayout, QWidget, QStatusBar # 移除了 QMenuBar, QToolBar
-from PyQt6.QtCore import Qt
 from modules.monitoring_tab import MonitoringTab
 from modules.batch_import_tab import BatchImportTab
 from modules.data_query_tab import DataQueryTab
